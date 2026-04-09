@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IdeaVault</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface2: #1a1a1a;
+    --border: rgba(255,255,255,0.07);
+    --border-mid: rgba(255,255,255,0.11);
+    --text: #f0f0f0;
+    --text-muted: rgba(240,240,240,0.5);
+    --text-dim: rgba(240,240,240,0.3);
+
+    /* Pastel key colors */
+    --peach:    #f5c5a3;
+    --lavender: #c8bfef;
+    --sage:     #b5d9c8;
+    --sky:      #a8d4ed;
+    --blush:    #f0b8c8;
+    --butter:   #f0e2a0;
+
+    --accent: #466ff7;   /* primary action — blue */
+    --accent-bg: rgba(70,111,247,0.12);
+
+    --card-h: 460px;
+    --card-w: 340px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* subtle noise texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 0 28px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(10,10,10,0.85);
+    backdrop-filter: blur(24px) saturate(1.6);
+    -webkit-backdrop-filter: blur(24px) saturate(1.6);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    height: 32px;
+  }
+  .logo img {
+    height: 32px;
+    width: auto;
+    object-fit: contain;
+  }
+  .logo-text {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .logo-text em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .header-right { display: flex; gap: 8px; align-items: center; }
+
+  .nav-tabs {
+    display: flex;
+    gap: 2px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 3px;
+  }
+  .nav-tab {
+    padding: 5px 15px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'Pretendard', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .nav-tab.active {
+    background: #222;
+    color: var(--text);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.30);
+  }
+
+  .btn {
+    padding: 7px 16px;
+    border-radius: 9px;
+    border: 1px solid var(--border-mid);
+    background: #1e1e1e;
+    color: var(--text);
+    font-family: 'Pretendard', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn:hover { background: #282828; }
+  .btn-primary {
+    background: var(--accent);
+    border-color: transparent;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(70,111,247,0.35);
+  }
+  .btn-primary:hover { background: #3558d4; box-shadow: 0 3px 12px rgba(70,111,247,0.4); }
+
+  /* ─── VIEWS ─── */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ══════════════════════════════
+     CAROUSEL VIEW
+  ══════════════════════════════ */
+  #stack-view {
+    padding-top: 60px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    gap: 20px;
+  }
+
+  /* The track that holds all cards side by side */
+  .carousel-viewport {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    height: var(--card-h);
+    display: flex;
+    align-items: center;
+  }
+
+  .carousel-track {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    transition: transform 0.55s cubic-bezier(0.32, 0.72, 0, 1);
+    will-change: transform;
+    padding: 40px 0;
+  }
+
+  /* Fade edges */
+  .carousel-viewport::before,
+  .carousel-viewport::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 80px;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .carousel-viewport::before {
+    left: 0;
+    background: linear-gradient(to right, var(--bg) 0%, transparent 100%);
+  }
+  .carousel-viewport::after {
+    right: 0;
+    background: linear-gradient(to left, var(--bg) 0%, transparent 100%);
+  }
+
+  /* ─── Individual card ─── */
+  .c-card {
+    flex-shrink: 0;
+    width: var(--card-w);
+    height: var(--card-h);
+    border-radius: 22px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 30px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+    /* far cards — barely visible */
+    transform: scale(0.84);
+    opacity: 0.2;
+    filter: blur(2px);
+    transition:
+      transform 0.5s cubic-bezier(0.32, 0.72, 0, 1),
+      opacity   0.5s cubic-bezier(0.32, 0.72, 0, 1),
+      filter    0.5s cubic-bezier(0.32, 0.72, 0, 1),
+      box-shadow 0.3s ease;
+    cursor: pointer;
+  }
+
+  .c-card.is-active {
+    transform: scale(1);
+    opacity: 1;
+    filter: none;
+    box-shadow:
+      0 24px 64px rgba(0,0,0,0.55),
+      0 4px 16px rgba(0,0,0,0.35);
+    border-color: rgba(255,255,255,0.13);
+    z-index: 2;
+  }
+
+  /* adjacent cards — clearly readable */
+  .c-card.is-prev,
+  .c-card.is-next {
+    transform: scale(0.9);
+    opacity: 0.6;
+    filter: none;
+    z-index: 1;
+  }
+
+  /* color accent strip at top of each card */
+  .c-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    border-radius: 22px 22px 0 0;
+    background: var(--card-color, #eee);
+    opacity: 0.85;
+  }
+
+  .c-card[data-tag="idea"]     { --card-color: var(--peach); }
+  .c-card[data-tag="project"]  { --card-color: var(--lavender); }
+  .c-card[data-tag="thought"]  { --card-color: var(--sage); }
+  .c-card[data-tag="question"] { --card-color: var(--sky); }
+
+  .card-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-bottom: 14px;
+    width: fit-content;
+  }
+  .tag-idea     { background: rgba(245,197,163,0.15); color: #f5a06a; }
+  .tag-project  { background: rgba(200,191,239,0.15); color: #b8aeef; }
+  .tag-thought  { background: rgba(181,217,200,0.15); color: #86c9a8; }
+  .tag-question { background: rgba(168,212,237,0.15); color: #7ec4e8; }
+
+  .card-title {
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--text);
+    letter-spacing: -0.4px;
+    flex: 1;
+    margin-bottom: 12px;
+  }
+  .card-preview {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.65;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 20px;
+    font-weight: 400;
+  }
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card-date {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .card-hint {
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .c-card.is-active .card-hint { opacity: 1; }
+
+  /* ─── Bottom controls — dots only ─── */
+  .carousel-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .dot-track {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+  .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.18);
+    transition: all 0.3s cubic-bezier(0.32,0.72,0,1);
+    cursor: pointer;
+  }
+  .dot.active {
+    width: 22px;
+    border-radius: 3px;
+    background: var(--accent);
+  }
+
+  .stack-counter { display: none; }
+  .stack-controls { display: none; }
+  .swipe-hint { display: none; }
+
+  /* ─── Empty state ─── */
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    width: 100%;
+  }
+  .empty-state h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .empty-state p { font-size: 14px; color: var(--text-dim); }
+
+  /* ══════════════════════════════
+     LIST VIEW
+  ══════════════════════════════ */
+  #list-view {
+    padding: 80px 32px 60px;
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+  .list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 24px;
+  }
+  .list-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .list-count {
+    font-size: 13px;
+    color: var(--text-dim);
+    font-weight: 500;
+  }
+  .ideas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+  }
+  .grid-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 20px 18px;
+    cursor: pointer;
+    transition: all 0.18s;
+    position: relative;
+    overflow: hidden;
+  }
+  .grid-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 16px 16px 0 0;
+    background: var(--card-color, #eee);
+  }
+  .grid-card[data-tag="idea"]     { --card-color: var(--peach); }
+  .grid-card[data-tag="project"]  { --card-color: var(--lavender); }
+  .grid-card[data-tag="thought"]  { --card-color: var(--sage); }
+  .grid-card[data-tag="question"] { --card-color: var(--sky); }
+  .grid-card:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+    border-color: rgba(0,0,0,0.04);
+  }
+  .grid-card .card-title { font-size: 15px; margin-bottom: 8px; font-weight: 700; }
+  .grid-card .card-preview { -webkit-line-clamp: 2; font-size: 13px; margin-bottom: 12px; }
+  .grid-card .card-date { font-size: 11px; color: var(--text-dim); font-weight: 500; }
+
+  /* ══════════════════════════════
+     DETAIL OVERLAY — card rises from below
+  ══════════════════════════════ */
+  #detail-view {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    background: rgba(0,0,0,0);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    padding: 0;
+    transition: background 0.35s ease, backdrop-filter 0.35s ease;
+  }
+  #detail-view.open {
+    display: flex;
+    background: rgba(0,0,0,0.25);
+    backdrop-filter: blur(20px) saturate(1.6);
+    -webkit-backdrop-filter: blur(20px) saturate(1.6);
+    animation: bgFadeIn 0.35s ease forwards;
+  }
+  @keyframes bgFadeIn {
+    from { background: rgba(0,0,0,0); backdrop-filter: blur(0px); }
+    to   { background: rgba(0,0,0,0.25); backdrop-filter: blur(20px) saturate(1.6); }
+  }
+
+  .detail-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 28px 28px 0 0;
+    padding: 10px 40px 50px;
+    width: 100%;
+    max-width: 640px;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+    animation: cardRiseUp 0.45s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+    box-shadow: 0 -8px 60px rgba(0,0,0,0.12);
+  }
+  @keyframes cardRiseUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+
+  .detail-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--border-mid);
+    border-radius: 2px;
+    margin: 12px auto 28px;
+  }
+
+  .detail-card::-webkit-scrollbar { width: 3px; }
+  .detail-card::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+
+  .detail-close {
+    position: absolute;
+    top: 22px; right: 20px;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--border-mid);
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-size: 13px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .detail-close:hover { background: rgba(0,0,0,0.06); color: var(--text); }
+
+  .detail-title {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.7px;
+    margin: 12px 0 16px;
+  }
+  .detail-body {
+    font-size: 15px;
+    line-height: 1.78;
+    color: var(--text-muted);
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-weight: 400;
+  }
+  .detail-meta {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .detail-date {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-weight: 500;
+  }
+  .detail-del {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(220,80,80,0.25);
+    background: transparent;
+    color: #c0392b;
+    font-size: 12px;
+    font-family: 'Pretendard', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .detail-del:hover { background: rgba(220,80,80,0.06); }
+
+  /* ══════════════════════════════
+     COMPOSE
+  ══════════════════════════════ */
+  #compose-view {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.2);
+    backdrop-filter: blur(20px) saturate(1.6);
+    -webkit-backdrop-filter: blur(20px) saturate(1.6);
+    padding: 20px;
+  }
+  #compose-view.open { display: flex; animation: fadeIn 0.22s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .compose-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 34px 34px;
+    max-width: 520px;
+    width: 100%;
+    position: relative;
+    animation: slideUp 0.32s cubic-bezier(0.32,0.72,0,1);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.12);
+  }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  .compose-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .compose-input, .compose-textarea, .compose-select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border-mid);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Pretendard', sans-serif;
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s;
+  }
+  .compose-input:focus, .compose-textarea:focus, .compose-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(70,111,247,0.15);
+  }
+  .compose-input {
+    font-size: 18px;
+    font-weight: 700;
+    padding: 11px 13px;
+    margin-bottom: 10px;
+    letter-spacing: -0.3px;
+  }
+  .compose-input::placeholder { color: var(--text-dim); font-weight: 400; }
+  .compose-textarea {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.7;
+    padding: 11px 13px;
+    min-height: 120px;
+    resize: vertical;
+    margin-bottom: 10px;
+  }
+  .compose-textarea::placeholder { color: var(--text-dim); }
+  .compose-select {
+    padding: 10px 13px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: 20px;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(240,240,240,0.3)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-color: var(--surface2);
+  }
+  .compose-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 30px; left: 50%;
+    transform: translateX(-50%) translateY(8px);
+    background: rgba(26,26,26,0.88);
+    border-radius: 12px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #fff;
+    z-index: 9000;
+    opacity: 0;
+    transition: opacity 0.25s, transform 0.25s;
+    pointer-events: none;
+    white-space: nowrap;
+    backdrop-filter: blur(10px);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 480px) {
+    :root {
+      --card-w: 300px;
+      --card-h: 420px;
+    }
+    .carousel-viewport::before,
+    .carousel-viewport::after {
+      width: 60px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <img src="logo.png" alt="IdeaVault" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <span class="logo-text" style="display:none">Idea<em>Vault</em></span>
+  </div>
+  <div class="header-right">
+    <div class="nav-tabs">
+      <button class="nav-tab active" id="tab-stack" onclick="switchView('stack')">카드</button>
+      <button class="nav-tab" id="tab-list" onclick="switchView('list')">전체보기</button>
+    </div>
+    <button class="btn btn-primary" onclick="openCompose()">+ New</button>
+  </div>
+</header>
+
+<!-- CAROUSEL VIEW -->
+<div id="stack-view" class="view active">
+  <div class="carousel-viewport" id="carousel-viewport">
+    <div class="carousel-track" id="carousel-track">
+      <!-- cards injected by JS -->
+    </div>
+  </div>
+  <div class="carousel-bottom">
+    <div class="dot-track" id="dot-track"></div>
+  </div>
+</div>
+
+<!-- LIST VIEW -->
+<div id="list-view" class="view">
+  <div class="list-header">
+    <h2>모든 아이디어</h2>
+    <span class="list-count" id="list-count">0개</span>
+  </div>
+  <div class="ideas-grid" id="ideas-grid"></div>
+</div>
+
+<!-- DETAIL OVERLAY -->
+<div id="detail-view">
+  <div class="detail-card">
+    <div class="detail-handle"></div>
+    <button class="detail-close" onclick="closeDetail()">✕</button>
+    <div class="card-tag" id="d-tag"></div>
+    <h2 class="detail-title" id="d-title"></h2>
+    <div class="detail-body" id="d-body"></div>
+    <div class="detail-meta">
+      <span class="detail-date" id="d-date"></span>
+      <button class="detail-del" id="d-del">삭제</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMPOSE OVERLAY -->
+<div id="compose-view">
+  <div class="compose-card">
+    <div class="compose-label">새 아이디어</div>
+    <input class="compose-input" id="c-title" placeholder="제목을 입력하세요" maxlength="80">
+    <textarea class="compose-textarea" id="c-body" placeholder="자세한 내용..."></textarea>
+    <select class="compose-select" id="c-tag">
+      <option value="idea">아이디어</option>
+      <option value="project">프로젝트</option>
+      <option value="thought">생각</option>
+      <option value="question">질문</option>
+    </select>
+    <div class="compose-actions">
+      <button class="btn" onclick="closeCompose()">취소</button>
+      <button class="btn btn-primary" onclick="saveIdea()">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+<script>
+var FIREBASE_CONFIG = {
+  databaseURL: "https://imby-391a0-default-rtdb.asia-southeast1.firebasedatabase.app/"
+};
+
+var db           = null;
+var ideas        = [];
+var currentIndex = 0;
+
+var TAG_MAP = {
+  idea:     { label: '아이디어', cls: 'tag-idea' },
+  project:  { label: '프로젝트', cls: 'tag-project' },
+  thought:  { label: '생각',     cls: 'tag-thought' },
+  question: { label: '질문',     cls: 'tag-question' }
+};
+
+/* ─── INIT ─── */
+(function () {
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database();
+    loadIdeas();
+  } catch (e) {
+    showToast('Firebase 오류: ' + e.message);
+    ideas = [];
+    render();
+  }
+}());
+
+/* ─── REALTIME DATABASE ─── */
+function loadIdeas() {
+  db.ref('ideas').orderByChild('createdAt').once('value')
+    .then(function (snap) {
+      var result = [];
+      snap.forEach(function (child) {
+        var data = child.val();
+        result.push({
+          id:    child.key,
+          title: data.title,
+          body:  data.body || '',
+          tag:   data.tag  || 'idea',
+          date:  data.createdAt ? new Date(data.createdAt).toLocaleDateString('ko-KR') : ''
+        });
+      });
+      ideas = result.reverse();
+      render();
+    })
+    .catch(function (e) {
+      showToast('불러오기 실패: ' + e.message);
+      ideas = [];
+      render();
+    });
+}
+
+function saveIdea() {
+  var title = document.getElementById('c-title').value.trim();
+  var body  = document.getElementById('c-body').value.trim();
+  var tag   = document.getElementById('c-tag').value;
+  if (!title) { showToast('제목을 입력해주세요'); return; }
+
+  var now    = Date.now();
+  var dateStr = new Date(now).toLocaleDateString('ko-KR');
+  var local   = { id: 'local_' + now, title: title, body: body, tag: tag, date: dateStr };
+
+  if (db) {
+    var ref = db.ref('ideas').push();
+    ref.set({
+      title: title, body: body, tag: tag, createdAt: now
+    }).then(function () {
+      local.id = ref.key;
+      afterSave(local);
+    }).catch(function (e) {
+      showToast('저장 실패: ' + e.message);
+    });
+  } else {
+    afterSave(local);
+  }
+}
+
+function afterSave(local) {
+  ideas.unshift(local);
+  currentIndex = 0;
+  closeCompose();
+  render();
+  showToast('저장되었습니다' + (db ? '' : ' (데모)'));
+}
+
+function deleteIdea(id) {
+  if (db && id.indexOf('s') !== 0 && id.indexOf('local_') !== 0) {
+    db.ref('ideas/' + id).remove().catch(function (e) { showToast('삭제 실패: ' + e.message); });
+  }
+  ideas = ideas.filter(function (i) { return i.id !== id; });
+  if (currentIndex >= ideas.length) currentIndex = Math.max(0, ideas.length - 1);
+  closeDetail();
+  render();
+  showToast('삭제되었습니다');
+}
+
+/* ─── RENDER ─── */
+function render() { renderCarousel(); renderGrid(); }
+
+/* ══════════════════════════════════════
+   HORIZONTAL CAROUSEL — INFINITE LOOP
+══════════════════════════════════════ */
+var CARD_W = 340;
+var CARD_GAP = 16;
+var CLONE_COUNT = 3; /* clones on each side */
+
+/* virtualIndex = position in the cloned array
+   realIndex    = actual idea index (= currentIndex) */
+var virtualIndex = CLONE_COUNT; /* starts at first real card */
+
+function buildCard(idea, i, isVirtual) {
+  var card = document.createElement('div');
+  card.className = 'c-card';
+  card.setAttribute('data-tag', idea.tag);
+  if (isVirtual) card.setAttribute('data-virtual', '1');
+  card.setAttribute('data-real-idx', i);
+
+  var t = TAG_MAP[idea.tag] || TAG_MAP.idea;
+  card.innerHTML =
+    '<div>' +
+      '<div class="card-tag ' + t.cls + '">' + t.label + '</div>' +
+      '<div class="card-title">' + esc(idea.title) + '</div>' +
+      (idea.body ? '<div class="card-preview">' + esc(idea.body) + '</div>' : '') +
+    '</div>' +
+    '<div class="card-footer">' +
+      '<span class="card-date">' + (idea.date || '') + '</span>' +
+      '<span class="card-hint">탭하여 열기</span>' +
+    '</div>';
+
+  return card;
+}
+
+function renderCarousel() {
+  var track    = document.getElementById('carousel-track');
+  var dotTrack = document.getElementById('dot-track');
+
+  track.innerHTML = '';
+  dotTrack.innerHTML = '';
+
+  if (ideas.length === 0) {
+    track.innerHTML = '<div class="empty-state"><h3>아이디어가 없습니다</h3><p>+ New 버튼으로 첫 아이디어를 기록해보세요</p></div>';
+    return;
+  }
+
+  var n = ideas.length;
+
+  /* Infinite loop: prepend n clones + real cards + append n clones */
+  track.innerHTML = '';
+  var fullList = [];
+  /* front clones (last n items rotated relative to currentIndex) */
+  for (var f = 0; f < n; f++) {
+    fullList.push(ideas[(currentIndex - n + f + n * 10) % n]);
+  }
+  /* real items */
+  for (var g = 0; g < n; g++) {
+    fullList.push(ideas[g]);
+  }
+  /* back clones */
+  for (var h = 0; h < n; h++) {
+    fullList.push(ideas[h % n]);
+  }
+
+  /* virtualIndex = n + currentIndex (position inside real section) */
+  virtualIndex = n + currentIndex;
+
+  fullList.forEach(function (idea, vi) {
+    var realIdx = vi % n;
+    var card = buildCard(idea, realIdx, vi < n || vi >= 2 * n);
+    (function(ri, vidx, ideaRef) {
+      card.addEventListener('click', function () {
+        if (vidx === virtualIndex) {
+          openDetail(ideaRef);
+        } else {
+          var diff = vidx - virtualIndex;
+          navCard(diff);
+        }
+      });
+    })(realIdx, vi, idea);
+    track.appendChild(card);
+  });
+
+  updateCardClasses();
+  positionTrack(false); /* no animation on initial render */
+
+  /* dots — only real count, max 20 shown */
+  var showDots = n <= 20;
+  dotTrack.style.display = showDots ? '' : 'none';
+  if (showDots) {
+    for (var di = 0; di < n; di++) {
+      var dot = document.createElement('div');
+      dot.className = 'dot' + (di === currentIndex ? ' active' : '');
+      (function(idx){ dot.addEventListener('click', function () { jumpTo(idx); }); })(di);
+      dotTrack.appendChild(dot);
+    }
+  }
+
+  setupDrag();
+}
+
+function updateCardClasses() {
+  var cards = document.querySelectorAll('.c-card');
+  var n = ideas.length;
+  cards.forEach(function (c, vi) {
+    c.classList.remove('is-active', 'is-prev', 'is-next');
+    if (vi === virtualIndex)     c.classList.add('is-active');
+    if (vi === virtualIndex - 1) c.classList.add('is-prev');
+    if (vi === virtualIndex + 1) c.classList.add('is-next');
+  });
+}
+
+function positionTrack(animate) {
+  var track = document.getElementById('carousel-track');
+  if (animate === false) {
+    track.style.transition = 'none';
+  } else {
+    track.style.transition = 'transform 0.55s cubic-bezier(0.32, 0.72, 0, 1)';
+  }
+  var offset = -virtualIndex * (CARD_W + CARD_GAP);
+  track.style.transform = 'translateX(calc(-50% + ' + (offset + (CARD_W / 2)) + 'px)) translateY(-50%)';
+}
+
+function jumpTo(realIdx) {
+  var n = ideas.length;
+  if (!n) return;
+  currentIndex = ((realIdx % n) + n) % n;
+  virtualIndex = n + currentIndex; /* reset to real section */
+
+  updateCardClasses();
+  positionTrack(false); /* instant reposition to real section */
+
+  /* force reflow so browser registers the no-transition position */
+  document.getElementById('carousel-track').getBoundingClientRect();
+
+  /* then animate to exact same position (no visible jump) */
+  positionTrack(true);
+
+  var dots = document.querySelectorAll('.dot');
+  dots.forEach(function (d, idx) {
+    d.classList.toggle('active', idx === currentIndex);
+  });
+}
+
+function navCard(dir) {
+  if (!ideas.length) return;
+  var n = ideas.length;
+
+  virtualIndex += dir;
+  currentIndex = ((virtualIndex % n) + n) % n;
+
+  updateCardClasses();
+  positionTrack(true);
+
+  var dots = document.querySelectorAll('.dot');
+  dots.forEach(function (d, idx) {
+    d.classList.toggle('active', idx === currentIndex);
+  });
+
+  /* After animation, silently jump back to real section if needed */
+  clearTimeout(navCard._wrapTimer);
+  navCard._wrapTimer = setTimeout(function () {
+    var cards = document.querySelectorAll('.c-card');
+    /* if virtualIndex left the real section, silently reset */
+    if (virtualIndex < n || virtualIndex >= 2 * n) {
+      virtualIndex = n + currentIndex;
+      positionTrack(false);
+    }
+  }, 600);
+}
+
+/* ── Drag / swipe ── */
+var dragData = { active: false, startX: 0, moved: 0 };
+var _dragBound = false;
+
+function setupDrag() {
+  var viewport = document.getElementById('carousel-viewport');
+
+  if (!_dragBound) {
+    _dragBound = true;
+
+    function startDrag(x) { dragData.active = true; dragData.startX = x; dragData.moved = 0; }
+    function moveDrag(x)  { if (!dragData.active) return; dragData.moved = x - dragData.startX; }
+    function endDrag()    {
+      if (!dragData.active) return;
+      dragData.active = false;
+      if (Math.abs(dragData.moved) > 40) navCard(dragData.moved < 0 ? 1 : -1);
+    }
+
+    viewport.addEventListener('mousedown',  function(e) { startDrag(e.clientX); });
+    document.addEventListener('mousemove',  function(e) { moveDrag(e.clientX); });
+    document.addEventListener('mouseup',    endDrag);
+    viewport.addEventListener('touchstart', function(e) { startDrag(e.touches[0].clientX); }, {passive:true});
+    viewport.addEventListener('touchmove',  function(e) { moveDrag(e.touches[0].clientX);  }, {passive:true});
+    viewport.addEventListener('touchend',   endDrag);
+  }
+}
+
+/* scroll wheel */
+var wheelTimer = null;
+document.getElementById('stack-view').addEventListener('wheel', function(e) {
+  e.preventDefault();
+  clearTimeout(wheelTimer);
+  wheelTimer = setTimeout(function() { navCard(e.deltaY > 0 ? 1 : -1); }, 60);
+}, { passive: false });
+
+/* ─── GRID ─── */
+function renderGrid() {
+  var grid = document.getElementById('ideas-grid');
+  document.getElementById('list-count').textContent = ideas.length + '개';
+  if (ideas.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 0;color:var(--text-dim);font-size:14px;">아직 기록된 아이디어가 없습니다</div>';
+    return;
+  }
+  grid.innerHTML = ideas.map(function (idea) {
+    var t = TAG_MAP[idea.tag] || TAG_MAP.idea;
+    return '<div class="grid-card" data-id="' + esc(idea.id) + '" data-tag="' + esc(idea.tag) + '">' +
+      '<div class="card-tag ' + t.cls + '" style="margin-bottom:12px">' + t.label + '</div>' +
+      '<div class="card-title">'   + esc(idea.title) + '</div>' +
+      (idea.body ? '<div class="card-preview">' + esc(idea.body) + '</div>' : '') +
+      '<div class="card-date">'    + (idea.date || '') + '</div>' +
+      '</div>';
+  }).join('');
+
+  grid.querySelectorAll('.grid-card').forEach(function (el) {
+    el.addEventListener('click', function () { openDetailById(el.dataset.id); });
+  });
+}
+
+/* ─── VIEW SWITCH ─── */
+function switchView(view) {
+  document.getElementById('stack-view').classList.toggle('active', view === 'stack');
+  document.getElementById('list-view').classList.toggle('active',  view === 'list');
+  document.getElementById('tab-stack').classList.toggle('active',  view === 'stack');
+  document.getElementById('tab-list').classList.toggle('active',   view === 'list');
+}
+
+/* ─── DETAIL ─── */
+function openCurrentDetail() {
+  if (ideas.length) openDetail(ideas[currentIndex]);
+}
+function openDetailById(id) {
+  var idea = ideas.find(function (i) { return i.id === id; });
+  if (idea) openDetail(idea);
+}
+function openDetail(idea) {
+  var t = TAG_MAP[idea.tag] || TAG_MAP.idea;
+  var tag = document.getElementById('d-tag');
+  tag.className   = 'card-tag ' + t.cls;
+  tag.textContent = t.label;
+  document.getElementById('d-title').textContent = idea.title;
+  document.getElementById('d-body').textContent  = idea.body || '내용 없음';
+  document.getElementById('d-date').textContent  = idea.date || '';
+  document.getElementById('d-del').onclick       = function () { deleteIdea(idea.id); };
+  document.getElementById('detail-view').classList.add('open');
+  document.getElementById('detail-view').style.display = 'flex';
+}
+function closeDetail() {
+  var v = document.getElementById('detail-view');
+  var card = v.querySelector('.detail-card');
+  card.style.animation = 'cardSlideDown 0.35s cubic-bezier(0.32,0.72,0,1) forwards';
+  v.style.transition = 'opacity 0.3s';
+  v.style.opacity = '0';
+  setTimeout(function () {
+    v.classList.remove('open');
+    v.style.display = 'none';
+    v.style.opacity = '';
+    card.style.animation = '';
+  }, 340);
+}
+
+document.getElementById('detail-view').addEventListener('click', function (e) {
+  if (e.target === this) closeDetail();
+});
+
+/* ─── COMPOSE ─── */
+function openCompose() {
+  document.getElementById('c-title').value = '';
+  document.getElementById('c-body').value  = '';
+  document.getElementById('c-tag').value   = 'idea';
+  document.getElementById('compose-view').classList.add('open');
+  setTimeout(function () { document.getElementById('c-title').focus(); }, 260);
+}
+function closeCompose() { document.getElementById('compose-view').classList.remove('open'); }
+document.getElementById('compose-view').addEventListener('click', function (e) {
+  if (e.target === this) closeCompose();
+});
+
+/* ─── KEYBOARD ─── */
+document.addEventListener('keydown', function (e) {
+  var dOpen = document.getElementById('detail-view').classList.contains('open');
+  var cOpen = document.getElementById('compose-view').classList.contains('open');
+  if (e.key === 'Escape') { closeDetail(); closeCompose(); return; }
+  if (dOpen || cOpen) return;
+  if (e.key === 'ArrowRight') navCard(1);
+  if (e.key === 'ArrowLeft')  navCard(-1);
+  if (e.key === 'Enter')      openCurrentDetail();
+});
+
+/* ─── TOAST ─── */
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function () { t.classList.remove('show'); }, 2600);
+}
+
+/* ─── UTILS ─── */
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
