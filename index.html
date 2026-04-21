@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>IdeaVault</title>
+
+<!-- ══════════════════════════════
+     SEO & 공유 미리보기 설정
+     아래 내용을 자유롭게 수정하세요
+══════════════════════════════ -->
+
+<!-- 기본 SEO -->
+<meta name="description" content="사회적 가치 아이디어를 기록하고 탐색하는 공간. 환경, 인권, 보건, 교육 등 다양한 분야의 아이디어를 카드로 정리해보세요.">
+<meta name="author" content="IdeaVault">
+<meta name="keywords" content="아이디어, 사회혁신, 사회적가치, 기록, IdeaVault">
+
+<!-- Open Graph (카카오톡·페이스북·슬랙 등 미리보기) -->
+<meta property="og:type"        content="website">
+<meta property="og:site_name"   content="IdeaVault">
+<meta property="og:title"       content="IdeaVault — 사회적 아이디어 보관함">
+<meta property="og:description" content="사회적 가치 아이디어를 기록하고 탐색하는 공간. 카드 형태로 아이디어를 쌓아보세요.">
+<meta property="og:image"        content="https://leekrheon.github.io/pastello/og-image.png">
+<meta property="og:image:width"  content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url"          content="https://leekrheon.github.io/pastello/">
+<meta property="og:locale"      content="ko_KR">
+
+<!-- Twitter Card (X/트위터 미리보기) -->
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:title"       content="IdeaVault — 사회적 아이디어 보관함">
+<meta name="twitter:description" content="사회적 가치 아이디어를 기록하고 탐색하는 공간. 카드 형태로 아이디어를 쌓아보세요.">
+<meta name="twitter:image"       content="https://leekrheon.github.io/pastello/og-image.png">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon"          href="favicon.svg">
+<meta name="theme-color" content="#7060a0">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+  :root {
+    --bg:         #f7f7f5;
+    --border:     rgba(0,0,0,0.07);
+    --border-mid: rgba(0,0,0,0.13);
+    --text:       #111111;
+    --text-muted: rgba(17,17,17,0.5);
+    --text-dim:   rgba(17,17,17,0.28);
+
+    /* Pillcast 이미지에서 추출한 색상 */
+    --col-env:       #a8cce0;   /* 환경·기후   — 라이트 스카이 블루 */
+    --col-human:     #e8a090;   /* 인권·평등   — 소프트 코랄 */
+    --col-health:    #b8d4b0;   /* 보건·복지   — 민트 그린 */
+    --col-edu:       #c8b4d8;   /* 교육·청소년 — 라벤더 퍼플 */
+    --col-community: #f0c878;   /* 지역사회    — 소프트 오렌지 옐로 */
+    --col-animal:    #e8d0a8;   /* 동물권      — 웜 샌드 */
+    --col-peace:     #a0c4d0;   /* 평화·안보   — 틸 블루 */
+    --col-other:     #d8d0c8;   /* 기타        — 웜 라이트 그레이 */
+
+    --card-radius: 18px;
+    --header-h: 54px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%; overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: var(--header-h); padding: 0 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+  }
+  .logo { display: flex; align-items: center; height: 22px; }
+  .logo img { height: 22px; width: auto; object-fit: contain; }
+  .logo-text { font-size: 15px; font-weight: 900; color: var(--text); letter-spacing: -0.6px; }
+  .logo-text em { font-style: normal; color: #7060a0; }
+
+  .header-right { display: flex; gap: 7px; align-items: center; }
+  .nav-tabs {
+    display: flex; gap: 2px;
+    background: rgba(0,0,0,0.07); border-radius: 9px; padding: 3px;
+  }
+  .nav-tab {
+    padding: 4px 13px; border-radius: 6px; border: none;
+    background: transparent; color: var(--text-muted);
+    font-family: 'Pretendard', sans-serif; font-size: 12px; font-weight: 700;
+    cursor: pointer; transition: all 0.16s; letter-spacing: -0.2px;
+  }
+  .nav-tab.active { background: #fff; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.09); }
+
+  .btn {
+    padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border-mid);
+    background: #fff; color: var(--text);
+    font-family: 'Pretendard', sans-serif; font-size: 12px; font-weight: 700;
+    cursor: pointer; transition: all 0.14s; letter-spacing: -0.2px;
+    touch-action: manipulation;
+  }
+  .btn:hover { background: #ebebeb; }
+  .btn-primary { background: var(--text); border-color: transparent; color: #fff; }
+  .btn-primary:hover { background: #333; }
+
+  .btn-plus {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: none; background: var(--text); color: #fff;
+    font-size: 20px; line-height: 1; font-weight: 300;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: background 0.14s;
+    touch-action: manipulation; flex-shrink: 0;
+    padding: 0;
+  }
+  .btn-plus:hover { background: #333; }
+
+  .nav-tab { touch-action: manipulation; }
+
+  /* ─── VIEWS ─── */
+  .view { display: none; position: absolute; top: var(--header-h); left: 0; right: 0; bottom: 0; }
+  .view.active { display: block; }
+
+  /* ══════════════════════════════
+     STACK VIEW
+  ══════════════════════════════ */
+  #stack-view {
+    overflow: hidden;
+  }
+  #stack-view.active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .stack-scene {
+    position: relative;
+    width: 320px;
+    height: 440px;
+  }
+
+  .s-card {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    border-radius: var(--card-radius);
+    padding: 26px 26px 22px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    cursor: pointer;
+    will-change: transform, opacity;
+    transition:
+      transform 0.48s cubic-bezier(0.32, 0.72, 0, 1),
+      opacity   0.38s cubic-bezier(0.32, 0.72, 0, 1),
+      box-shadow 0.28s ease;
+    overflow: hidden;
+    user-select: none; -webkit-user-select: none;
+  }
+
+  /* Liquid glass cards */
+  .s-card {
+    backdrop-filter: blur(24px) saturate(1.6);
+    -webkit-backdrop-filter: blur(24px) saturate(1.6);
+    border: 1px solid rgba(255,255,255,0.55);
+  }
+  .s-card[data-tag="env"]       { background: linear-gradient(145deg, rgba(168,204,224,0.72) 0%, rgba(168,204,224,0.52) 100%); color: #111; }
+  .s-card[data-tag="human"]     { background: linear-gradient(145deg, rgba(232,160,144,0.72) 0%, rgba(232,160,144,0.52) 100%); color: #111; }
+  .s-card[data-tag="health"]    { background: linear-gradient(145deg, rgba(184,212,176,0.72) 0%, rgba(184,212,176,0.52) 100%); color: #111; }
+  .s-card[data-tag="edu"]       { background: linear-gradient(145deg, rgba(200,180,216,0.72) 0%, rgba(200,180,216,0.52) 100%); color: #111; }
+  .s-card[data-tag="community"] { background: linear-gradient(145deg, rgba(240,200,120,0.72) 0%, rgba(240,200,120,0.52) 100%); color: #111; }
+  .s-card[data-tag="animal"]    { background: linear-gradient(145deg, rgba(232,208,168,0.72) 0%, rgba(232,208,168,0.52) 100%); color: #111; }
+  .s-card[data-tag="peace"]     { background: linear-gradient(145deg, rgba(160,196,208,0.72) 0%, rgba(160,196,208,0.52) 100%); color: #111; }
+  .s-card[data-tag="other"]     { background: linear-gradient(145deg, rgba(216,208,200,0.72) 0%, rgba(216,208,200,0.52) 100%); color: #111; }
+
+  /* glass shine overlay */
+  .s-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(145deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0.04) 60%, transparent 100%);
+    pointer-events: none;
+  }
+
+  .s-card.layer-0 {
+    transform: translateY(0) scale(1); opacity: 1; z-index: 10;
+    box-shadow: 0 18px 48px rgba(0,0,0,0.16), 0 4px 10px rgba(0,0,0,0.08);
+  }
+  .s-card.layer-1 { transform: translateY(12px) scale(0.958); opacity: 1; z-index: 9; box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+  .s-card.layer-2 { transform: translateY(22px) scale(0.916); opacity: 0.8; z-index: 8; }
+  .s-card.layer-3 { transform: translateY(30px) scale(0.876); opacity: 0.45; z-index: 7; }
+  .s-card.layer-hidden { transform: translateY(38px) scale(0.84); opacity: 0; z-index: 6; pointer-events: none; }
+  .s-card.layer-exit { transform: translateY(-115%) scale(0.94) rotate(-2deg); opacity: 0; z-index: 11; pointer-events: none; }
+  .s-card.dragging { transition: none !important; }
+
+  .card-top { flex: 1; display: flex; flex-direction: column; align-items: flex-start; }
+
+  .card-tag-badge {
+    display: block;
+    font-size: 9px; font-weight: 800; letter-spacing: 0.14em;
+    text-transform: uppercase; opacity: 0.5; margin-bottom: 12px; color: #111;
+  }
+
+  /* 날짜: 하단 footer 왼쪽, 제목만큼 크게 */
+  .card-date-big {
+    display: block;
+    font-size: 22px; font-weight: 900; letter-spacing: -0.6px;
+    opacity: 0.35; color: #111; line-height: 1;
+  }
+
+  .card-title {
+    display: block;
+    font-size: 26px; font-weight: 900; line-height: 1.14;
+    letter-spacing: -0.8px; word-break: keep-all; color: #111;
+    width: 100%;
+  }
+
+  .card-preview {
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden; margin-top: 12px; opacity: 0.55;
+    font-size: 13px; line-height: 1.58; font-weight: 400; color: #111;
+    width: 100%;
+  }
+
+  .card-footer {
+    display: flex; justify-content: space-between;
+    align-items: flex-end; margin-top: 18px;
+  }
+  .card-open-hint {
+    font-size: 18px; line-height: 1;
+    opacity: 0; transition: opacity 0.2s;
+    color: #111;
+  }
+  .s-card.layer-0 .card-open-hint { opacity: 0.45; }
+
+  /* 카드 배경 점수 — 오른쪽 하단~중간, 크고 흐릿하게 */
+  .card-score-bg {
+    position: absolute;
+    right: -8px; bottom: -10px;
+    font-size: 234px; font-weight: 900; line-height: 1;
+    letter-spacing: -6px;
+    color: rgba(255,255,255,0.28);
+    pointer-events: none; user-select: none;
+    filter: blur(1px);
+  }
+
+  .empty-state { text-align: center; padding: 60px 20px; width: 100%; }
+  .empty-state h3 { font-size: 17px; font-weight: 800; color: var(--text-muted); margin-bottom: 6px; }
+  .empty-state p { font-size: 13px; color: var(--text-dim); }
+
+  /* ══════════════════════════════
+     LIST VIEW
+  ══════════════════════════════ */
+  #list-view {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px 16px 48px;
+  }
+
+  .list-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 14px; padding: 0 2px;
+  }
+  .list-header h2 { font-size: 19px; font-weight: 900; letter-spacing: -0.5px; color: #111; }
+  .list-count { font-size: 11px; color: var(--text-dim); font-weight: 700; }
+
+  .list-cards { display: flex; flex-direction: column; gap: 10px; }
+
+  .list-card {
+    border-radius: var(--card-radius);
+    padding: 18px 0 18px 22px;
+    display: flex; align-items: stretch;
+    cursor: pointer;
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+    min-height: 88px; position: relative; overflow: hidden;
+  }
+  /* Liquid glass list cards */
+  .list-card {
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    border: 1px solid rgba(255,255,255,0.50);
+    box-shadow: 0 4px 18px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.5);
+  }
+  .list-card[data-tag="env"]       { background: linear-gradient(145deg, rgba(168,204,224,0.70) 0%, rgba(168,204,224,0.48) 100%); }
+  .list-card[data-tag="human"]     { background: linear-gradient(145deg, rgba(232,160,144,0.70) 0%, rgba(232,160,144,0.48) 100%); }
+  .list-card[data-tag="health"]    { background: linear-gradient(145deg, rgba(184,212,176,0.70) 0%, rgba(184,212,176,0.48) 100%); }
+  .list-card[data-tag="edu"]       { background: linear-gradient(145deg, rgba(200,180,216,0.70) 0%, rgba(200,180,216,0.48) 100%); }
+  .list-card[data-tag="community"] { background: linear-gradient(145deg, rgba(240,200,120,0.70) 0%, rgba(240,200,120,0.48) 100%); }
+  .list-card[data-tag="animal"]    { background: linear-gradient(145deg, rgba(232,208,168,0.70) 0%, rgba(232,208,168,0.48) 100%); }
+  .list-card[data-tag="peace"]     { background: linear-gradient(145deg, rgba(160,196,208,0.70) 0%, rgba(160,196,208,0.48) 100%); }
+  .list-card[data-tag="other"]     { background: linear-gradient(145deg, rgba(216,208,200,0.70) 0%, rgba(216,208,200,0.48) 100%); }
+  .list-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(145deg, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.03) 55%, transparent 100%);
+    pointer-events: none;
+  }
+  .list-card:active { transform: scale(0.986); }
+
+  .lc-left { flex: 1; min-width: 0; padding-right: 8px; display: flex; flex-direction: column; justify-content: center; }
+  .lc-score-big {
+    font-size: clamp(64px, 18vw, 96px); font-weight: 900; line-height: 0.88;
+    letter-spacing: -4px; color: #111; opacity: 0.88;
+    flex-shrink: 0; width: 96px;
+    display: flex; align-items: center; justify-content: flex-end;
+    padding-right: 18px;
+  }
+  .lc-score-big.score-dim { opacity: 0.18; }
+
+  /* 모든 list-card 텍스트 검은색 */
+  .list-card .lc-tag {
+    font-size: 9px; font-weight: 800; letter-spacing: 0.13em;
+    text-transform: uppercase; opacity: 0.45; color: #111; margin-bottom: 4px;
+  }
+  .list-card .lc-date {
+    font-size: 11px; font-weight: 600; letter-spacing: 0px;
+    opacity: 0.35; color: #111; margin-top: 6px;
+  }
+  .list-card .lc-title {
+    font-size: 20px; font-weight: 900; line-height: 1.18;
+    letter-spacing: -0.5px; word-break: keep-all; color: #111;
+  }
+  .list-card .lc-preview {
+    font-size: 13px; line-height: 1.52;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden; opacity: 0.52; font-weight: 400; color: #111; margin-top: 6px;
+  }
+
+  /* ══════════════════════════════
+     DETAIL OVERLAY
+  ══════════════════════════════ */
+  #detail-view {
+    position: fixed; inset: 0; z-index: 200;
+    display: none; align-items: flex-end; justify-content: center;
+  }
+  #detail-view.open { display: flex; }
+
+  .detail-backdrop {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0); backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px);
+    transition: background 0.32s ease, backdrop-filter 0.32s ease; cursor: pointer;
+  }
+  #detail-view.open .detail-backdrop {
+    background: rgba(0,0,0,0.28); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  }
+
+  .detail-card {
+    position: relative; z-index: 1;
+    background: rgba(255,255,255,0.78);
+    backdrop-filter: blur(32px) saturate(1.8);
+    -webkit-backdrop-filter: blur(32px) saturate(1.8);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 24px 24px 0 0;
+    padding: 8px 26px 48px;
+    width: 100%; max-width: 580px; max-height: 88vh; overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.44s cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: 0 -4px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.7);
+  }
+  #detail-view.open .detail-card { transform: translateY(0); }
+  .detail-card.closing { transform: translateY(100%); }
+  .detail-card::-webkit-scrollbar { width: 3px; }
+  .detail-card::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.07); border-radius: 2px; }
+
+  .detail-handle {
+    width: 32px; height: 4px; background: rgba(0,0,0,0.09);
+    border-radius: 2px; margin: 10px auto 20px;
+  }
+  .detail-close {
+    position: absolute; top: 16px; right: 16px;
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 1px solid var(--border-mid); background: #f2f1ee;
+    color: var(--text-muted); font-size: 11px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all 0.13s;
+  }
+  .detail-close:hover { background: #e6e4e0; color: var(--text); }
+
+  #d-tag {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 9px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase;
+    margin-bottom: 10px; color: #111;
+  }
+  #d-tag.tag-env       { background: var(--col-env); }
+  #d-tag.tag-human     { background: var(--col-human); }
+  #d-tag.tag-health    { background: var(--col-health); }
+  #d-tag.tag-edu       { background: var(--col-edu); }
+  #d-tag.tag-community { background: var(--col-community); }
+  #d-tag.tag-animal    { background: var(--col-animal); }
+  #d-tag.tag-peace     { background: var(--col-peace); }
+  #d-tag.tag-other     { background: var(--col-other); }
+
+  .detail-title {
+    font-size: 24px; font-weight: 900; line-height: 1.15;
+    letter-spacing: -0.7px; margin: 0 0 14px; word-break: keep-all; color: #111;
+  }
+  .detail-body {
+    font-size: 15px; line-height: 1.76; color: var(--text-muted);
+    white-space: pre-wrap; word-break: break-word; font-weight: 400;
+  }
+  .detail-meta {
+    margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .detail-date { font-size: 11px; color: var(--text-dim); font-weight: 600; }
+  .detail-actions { display: flex; gap: 7px; }
+
+  .detail-edit {
+    padding: 5px 13px; border-radius: 7px;
+    border: 1px solid var(--border-mid);
+    background: transparent; color: var(--text);
+    font-size: 11px; font-family: 'Pretendard', sans-serif;
+    font-weight: 700; cursor: pointer; transition: all 0.13s;
+  }
+  .detail-edit:hover { background: #f0efeb; }
+
+  .detail-del {
+    padding: 5px 13px; border-radius: 7px;
+    border: 1px solid rgba(200,60,60,0.2);
+    background: transparent; color: #c83c3c;
+    font-size: 11px; font-family: 'Pretendard', sans-serif;
+    font-weight: 700; cursor: pointer; transition: all 0.13s;
+  }
+  .detail-del:hover { background: rgba(200,60,60,0.07); }
+
+  /* ══════════════════════════════
+     COMPOSE / EDIT OVERLAY
+  ══════════════════════════════ */
+  #compose-view {
+    position: fixed; inset: 0; z-index: 300;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    padding: 24px 20px;
+  }
+  #compose-view.open { display: flex; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .compose-card {
+    background: rgba(255,255,255,0.82);
+    backdrop-filter: blur(32px) saturate(1.8);
+    -webkit-backdrop-filter: blur(32px) saturate(1.8);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 20px;
+    padding: 28px 28px 24px;
+    width: 100%; max-width: 640px;
+    height: calc(100vh - 48px);
+    display: flex; flex-direction: column;
+    animation: slideUp 0.28s cubic-bezier(0.32,0.72,0,1);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.7);
+  }
+  @keyframes slideUp { from { transform: translateY(14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  .compose-label {
+    font-size: 9px; color: var(--text-dim); font-weight: 800;
+    letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 14px; color: #111;
+  }
+  .compose-input, .compose-textarea, .compose-select {
+    width: 100%; background: #f4f3f0;
+    border: 1px solid var(--border-mid); border-radius: 10px;
+    color: #111; font-family: 'Pretendard', sans-serif;
+    outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .compose-input:focus, .compose-textarea:focus, .compose-select:focus {
+    border-color: #7060a0; box-shadow: 0 0 0 3px rgba(112,96,160,0.10); background: #fff;
+  }
+  .compose-input {
+    font-size: 16px; font-weight: 800; padding: 11px 12px;
+    margin-bottom: 8px; letter-spacing: -0.3px;
+  }
+  .compose-input::placeholder { color: var(--text-dim); font-weight: 400; font-size: 14px; }
+  .compose-textarea {
+    font-size: 14px; font-weight: 400; line-height: 1.66;
+    padding: 11px 12px; min-height: 220px; resize: vertical; margin-bottom: 8px;
+    flex: 1;
+  }
+  .compose-textarea::placeholder { color: var(--text-dim); }
+  .compose-select {
+    padding: 10px 12px; font-size: 13px; font-weight: 700;
+    cursor: pointer; margin-bottom: 14px; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(0,0,0,0.28)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+  }
+  .compose-actions { display: flex; gap: 7px; justify-content: flex-end; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(8px);
+    background: rgba(17,17,17,0.90); border-radius: 10px;
+    padding: 9px 18px; font-size: 13px; font-weight: 700; color: #fff;
+    z-index: 9000; opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ─── LIST CARD ENTRANCE ANIMATION ─── */
+  @keyframes cardSlideIn {
+    from { opacity: 0; transform: translateX(32px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .list-card.animating {
+    opacity: 0;
+    animation: cardSlideIn 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  .compose-score-row {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 8px;
+  }
+  .compose-score-label {
+    font-size: 9px; color: var(--text-dim); font-weight: 800;
+    letter-spacing: 0.14em; text-transform: uppercase; white-space: nowrap;
+  }
+  .compose-score-val {
+    font-size: 22px; font-weight: 900; color: #111;
+    letter-spacing: -0.5px; min-width: 28px; text-align: right;
+  }
+  .score-slider {
+    -webkit-appearance: none; appearance: none;
+    flex: 1; height: 6px; border-radius: 3px;
+    background: linear-gradient(to right, #111 0%, #111 var(--pct, 0%), rgba(0,0,0,0.1) var(--pct, 0%), rgba(0,0,0,0.1) 100%);
+    outline: none; cursor: pointer;
+  }
+  .score-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #fff; border: 2px solid #111;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+    cursor: pointer; transition: transform 0.1s;
+  }
+  .score-slider::-webkit-slider-thumb:active { transform: scale(1.25); }
+  .score-slider::-moz-range-thumb {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #fff; border: 2px solid #111;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.18); cursor: pointer;
+  }
+
+  /* ── LIST CARD redesign — big score right ── */
+  .list-card {
+    border-radius: var(--card-radius);
+    padding: 20px 20px 20px 22px;
+    display: flex; align-items: center;
+    cursor: pointer;
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+    min-height: 88px; position: relative; overflow: hidden;
+  }
+  .lc-left { flex: 1; min-width: 0; padding-right: 12px; display: flex; flex-direction: column; justify-content: center; }
+  .lc-score-big {
+    font-size: clamp(64px, 18vw, 96px); font-weight: 900; line-height: 0.88;
+    letter-spacing: -4px; color: #111; opacity: 0.88;
+    flex-shrink: 0; text-align: right;
+    min-width: 72px;
+  }
+  @media (max-width: 400px) {
+    .stack-scene { width: 288px; height: 410px; }
+    .card-title { font-size: 23px; }
+    .lc-score-big { font-size: 72px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <img src="logo.png" alt="IdeaVault" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <span class="logo-text" style="display:none">Idea<em>Vault</em></span>
+  </div>
+  <div class="header-right">
+    <div class="nav-tabs">
+      <button class="nav-tab active" id="tab-stack" onclick="switchView('stack')">STACK</button>
+      <button class="nav-tab"        id="tab-list"  onclick="switchView('list')">ALL</button>
+    </div>
+    <button class="btn-plus" onclick="openCompose(null)">+</button>
+  </div>
+</header>
+
+<!-- STACK VIEW -->
+<div id="stack-view" class="view active">
+  <div class="stack-scene" id="stack-scene"></div>
+</div>
+
+<!-- LIST VIEW -->
+<div id="list-view" class="view">
+  <div class="list-header">
+    <h2>모든 캠페인</h2>
+    <span class="list-count" id="list-count">0개</span>
+  </div>
+  <div class="list-cards" id="list-cards"></div>
+</div>
+
+<!-- DETAIL OVERLAY -->
+<div id="detail-view">
+  <div class="detail-backdrop" id="detail-backdrop"></div>
+  <div class="detail-card" id="detail-card">
+    <div class="detail-handle"></div>
+    <button class="detail-close" onclick="closeDetail()">✕</button>
+    <div id="d-tag"></div>
+    <h2 class="detail-title" id="d-title"></h2>
+    <div class="detail-body" id="d-body"></div>
+    <div id="d-score" style="font-size:13px;font-weight:700;color:var(--text-muted);margin-top:14px;"></div>
+    <div class="detail-meta">
+      <span class="detail-date" id="d-date"></span>
+      <div class="detail-actions">
+        <button class="detail-edit" id="d-edit">수정</button>
+        <button class="detail-del"  id="d-del">삭제</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <div id="compose-view">
+  <div class="compose-card">
+    <div class="compose-label" id="compose-label">새 캠페인 아이디어</div>
+    <input class="compose-input" id="c-title" placeholder="캠페인 제목" maxlength="80">
+    <textarea class="compose-textarea" id="c-body" placeholder="캠페인 내용, 목표, 방법..."></textarea>
+    <div class="compose-score-row">
+      <span class="compose-score-label">점수</span>
+      <input type="range" class="score-slider" id="c-score" min="1" max="10" value="5"
+        oninput="var v=this.value; document.getElementById('c-score-val').textContent=v; this.style.setProperty('--pct', ((v-1)/9*100)+'%')">
+      <span class="compose-score-val" id="c-score-val">5</span>
+    </div>
+    <select class="compose-select" id="c-tag">
+      <option value="env">환경·기후</option>
+      <option value="human">인권·평등</option>
+      <option value="health">보건·복지</option>
+      <option value="edu">교육·청소년</option>
+      <option value="community">지역사회</option>
+      <option value="animal">동물권</option>
+      <option value="peace">평화·안보</option>
+      <option value="other">기타</option>
+    </select>
+    <div class="compose-actions">
+      <button class="btn" onclick="closeCompose()">취소</button>
+      <button class="btn btn-primary" id="compose-submit" onclick="submitCompose()">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script>
+/* ══════════════════════════════
+   STATE
+══════════════════════════════ */
+var FIREBASE_CONFIG = { databaseURL: "https://imby-391a0-default-rtdb.asia-southeast1.firebasedatabase.app/" };
+var db = null;
+var ideas = [];
+var currentIndex = 0;
+var isAnimating = false;
+var editingId = null;   // null = 새 작성, string = 수정 중
+
+var TAG_MAP = {
+  env:       { label: '환경·기후',   cls: 'tag-env' },
+  human:     { label: '인권·평등',   cls: 'tag-human' },
+  health:    { label: '보건·복지',   cls: 'tag-health' },
+  edu:       { label: '교육·청소년', cls: 'tag-edu' },
+  community: { label: '지역사회',    cls: 'tag-community' },
+  animal:    { label: '동물권',      cls: 'tag-animal' },
+  peace:     { label: '평화·안보',   cls: 'tag-peace' },
+  other:     { label: '기타',        cls: 'tag-other' }
+};
+
+/* ══════════════════════════════
+   FIREBASE
+══════════════════════════════ */
+(function () {
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database();
+    loadIdeas();
+  } catch (e) {
+    showToast('Firebase 오류: ' + e.message);
+    ideas = []; render();
+  }
+}());
+
+function loadIdeas() {
+  db.ref('ideas').orderByChild('createdAt').once('value')
+    .then(function (snap) {
+      var result = [];
+      snap.forEach(function (child) {
+        var d = child.val();
+        result.push({
+          id: child.key, title: d.title, body: d.body || '',
+          tag: d.tag || 'other',
+          score: d.score != null ? d.score : null,
+          createdAt: d.createdAt || 0,
+          date: d.createdAt ? new Date(d.createdAt).toLocaleDateString('ko-KR') : ''
+        });
+      });
+      ideas = result.reverse();
+      render();
+    })
+    .catch(function (e) { showToast('불러오기 실패'); ideas = []; render(); });
+}
+
+/* ══════════════════════════════
+   COMPOSE / EDIT
+══════════════════════════════ */
+function openCompose(ideaId) {
+  editingId = ideaId || null;
+
+  if (editingId) {
+    /* 수정 모드 */
+    var idea = ideas.find(function(i) { return i.id === editingId; });
+    if (!idea) return;
+    document.getElementById('compose-label').textContent = '캠페인 수정';
+    document.getElementById('compose-submit').textContent = '저장';
+    document.getElementById('c-title').value = idea.title;
+    document.getElementById('c-body').value  = idea.body;
+    document.getElementById('c-tag').value   = idea.tag;
+    var sv = idea.score != null ? idea.score : 5;
+    document.getElementById('c-score').value = sv;
+    document.getElementById('c-score-val').textContent = sv;
+    document.getElementById('c-score').style.setProperty('--pct', ((sv-1)/9*100)+'%');
+    closeDetail();
+  } else {
+    /* 새 작성 모드 */
+    document.getElementById('compose-label').textContent = '새 캠페인 아이디어';
+    document.getElementById('compose-submit').textContent = '저장';
+    document.getElementById('c-title').value = '';
+    document.getElementById('c-body').value  = '';
+    document.getElementById('c-tag').value   = 'env';
+    document.getElementById('c-score').value = 5;
+    document.getElementById('c-score-val').textContent = '5';
+    document.getElementById('c-score').style.setProperty('--pct', ((5-1)/9*100)+'%');
+  }
+
+  document.getElementById('compose-view').classList.add('open');
+  setTimeout(function() { document.getElementById('c-title').focus(); }, 240);
+}
+
+function closeCompose() {
+  document.getElementById('compose-view').classList.remove('open');
+  editingId = null;
+}
+
+document.getElementById('compose-view').addEventListener('click', function(e) {
+  if (e.target === this) closeCompose();
+});
+
+function submitCompose() {
+  var title = document.getElementById('c-title').value.trim();
+  var body  = document.getElementById('c-body').value.trim();
+  var tag   = document.getElementById('c-tag').value;
+  var score = parseInt(document.getElementById('c-score').value);
+  if (!title) { showToast('제목을 입력해주세요'); return; }
+
+  if (editingId) {
+    /* ─ 수정 ─ */
+    var idea = ideas.find(function(i) { return i.id === editingId; });
+    if (idea) {
+      idea.title = title; idea.body = body; idea.tag = tag; idea.score = score;
+      if (db && editingId.indexOf('local_') !== 0) {
+        db.ref('ideas/' + editingId).update({ title: title, body: body, tag: tag, score: score })
+          .catch(function(e) { showToast('수정 실패'); });
+      }
+    }
+    closeCompose();
+    render();
+    showToast('수정되었습니다');
+  } else {
+    /* ─ 새 저장 ─ */
+    var now = Date.now();
+    var tempId = 'local_' + now;
+    var local = { id: tempId, title: title, body: body, tag: tag, score: score, createdAt: now, date: new Date(now).toLocaleDateString('ko-KR') };
+
+    ideas.unshift(local);
+    currentIndex = 0;
+    closeCompose();
+    render();
+    showToast('저장되었습니다');
+
+    if (db) {
+      var ref = db.ref('ideas').push();
+      ref.set({ title: title, body: body, tag: tag, score: score, createdAt: now })
+        .then(function () {
+          var item = ideas.find(function(i) { return i.id === tempId; });
+          if (item) item.id = ref.key;
+        })
+        .catch(function (e) {
+          showToast('저장 실패');
+          ideas = ideas.filter(function(i) { return i.id !== tempId; });
+          render();
+        });
+    }
+  }
+}
+
+function deleteIdea(id) {
+  if (db && id.indexOf('local_') !== 0) {
+    db.ref('ideas/' + id).remove().catch(function(e) { showToast('삭제 실패'); });
+  }
+  ideas = ideas.filter(function(i) { return i.id !== id; });
+  if (currentIndex >= ideas.length) currentIndex = Math.max(0, ideas.length - 1);
+  closeDetail();
+  render();
+  showToast('삭제되었습니다');
+}
+
+/* ══════════════════════════════
+   RENDER
+══════════════════════════════ */
+function render() { renderStack(); renderList(); }
+
+/* ─── STACK ─── */
+function renderStack() {
+  var scene = document.getElementById('stack-scene');
+  scene.innerHTML = '';
+  if (!ideas.length) {
+    scene.innerHTML = '<div class="empty-state"><h3>캠페인 아이디어가 없습니다</h3><p>+ New 버튼으로 첫 아이디어를 기록해보세요</p></div>';
+    return;
+  }
+  rebuildCards();
+  setupDrag();
+}
+
+function rebuildCards() {
+  var scene = document.getElementById('stack-scene');
+  scene.innerHTML = '';
+  if (!ideas.length) return;
+  var n = ideas.length;
+  var count = Math.min(4, n);
+  for (var i = count - 1; i >= 0; i--) {
+    var idx = (currentIndex + i) % n;
+    var card = buildCardEl(ideas[idx], i === 0);
+    card.setAttribute('data-stackpos', i);
+    applyLayer(card, i);
+    scene.appendChild(card);
+  }
+}
+
+function buildCardEl(idea, isTop) {
+  var t = TAG_MAP[idea.tag] || TAG_MAP.other;
+  var card = document.createElement('div');
+  card.className = 's-card';
+  card.setAttribute('data-tag', idea.tag);
+
+  card.innerHTML =
+    (idea.score != null ? '<div class="card-score-bg">' + idea.score + '</div>' : '') +
+    '<div class="card-top">' +
+      '<div class="card-tag-badge">' + t.label + '</div>' +
+      '<div class="card-title">' + esc(idea.title) + '</div>' +
+      (idea.body ? '<div class="card-preview">' + esc(idea.body) + '</div>' : '') +
+    '</div>' +
+    '<div class="card-footer">' +
+      (idea.date ? '<div class="card-date-big">' + esc(idea.date) + '</div>' : '<div></div>') +
+      '<div class="card-open-hint">→</div>' +
+    '</div>';
+
+  if (isTop) {
+    card.addEventListener('click', function() {
+      if (Math.abs(dragState.totalMoved) < 8) openDetailById(idea.id);
+    });
+  }
+  return card;
+}
+
+function applyLayer(card, i) {
+  card.classList.remove('layer-0','layer-1','layer-2','layer-3','layer-hidden');
+  card.classList.add(['layer-0','layer-1','layer-2','layer-3'][i] || 'layer-hidden');
+}
+
+/* ─── NAV ─── */
+function navNext() {
+  if (isAnimating || ideas.length < 2) return;
+  isAnimating = true;
+  var scene = document.getElementById('stack-scene');
+  var topCard = scene.querySelector('.layer-0');
+  if (topCard) {
+    topCard.classList.remove('layer-0'); topCard.classList.add('layer-exit');
+    scene.querySelectorAll('.s-card:not(.layer-exit)').forEach(function(c) {
+      var p = parseInt(c.getAttribute('data-stackpos'));
+      c.setAttribute('data-stackpos', p - 1); applyLayer(c, p - 1);
+    });
+  }
+  setTimeout(function() {
+    isAnimating = false;
+    currentIndex = (currentIndex + 1) % ideas.length;
+    rebuildCards();
+  }, 460);
+}
+
+function navPrev() {
+  if (isAnimating || ideas.length < 2) return;
+  currentIndex = (currentIndex - 1 + ideas.length) % ideas.length;
+  rebuildCards();
+}
+
+/* ─── DRAG ─── */
+var dragState = { active: false, startY: 0, totalMoved: 0 };
+var _dragBound = false;
+
+function setupDrag() {
+  if (_dragBound) return;
+  _dragBound = true;
+  var scene = document.getElementById('stack-scene');
+
+  function start(y) {
+    if (isAnimating) return;
+    dragState.active = true; dragState.startY = y; dragState.totalMoved = 0;
+    var top = scene.querySelector('.layer-0');
+    if (top) top.classList.add('dragging');
+  }
+  function move(y) {
+    if (!dragState.active) return;
+    var dy = y - dragState.startY;
+    dragState.totalMoved = dy;
+    var top = scene.querySelector('.layer-0');
+    if (!top) return;
+    var clamp = Math.max(-220, Math.min(55, dy));
+    top.style.transform = 'translateY(' + (clamp * (dy < 0 ? 1 : 0.38)) + 'px) rotate(' + (clamp * 0.018) + 'deg) scale(1)';
+    top.style.opacity = dy < 0 ? Math.max(0.15, 1 + dy / 180) : '1';
+    var next = scene.querySelector('.layer-1');
+    if (next && dy < 0) {
+      var prog = Math.min(1, Math.abs(dy) / 110);
+      next.style.transform = 'translateY(' + (12 - prog * 12) + 'px) scale(' + (0.958 + prog * 0.042) + ')';
+    }
+  }
+  function end() {
+    if (!dragState.active) return;
+    dragState.active = false;
+    var top = scene.querySelector('.layer-0');
+    if (top) { top.classList.remove('dragging'); top.style.transform = ''; top.style.opacity = ''; }
+    var next = scene.querySelector('.layer-1');
+    if (next) { next.style.transform = ''; }
+    if (dragState.totalMoved < -55) navNext();
+    else if (dragState.totalMoved > 55) navPrev();
+  }
+
+  scene.addEventListener('mousedown', function(e) { start(e.clientY); });
+  document.addEventListener('mousemove', function(e) { move(e.clientY); });
+  document.addEventListener('mouseup', end);
+  scene.addEventListener('touchstart', function(e) { start(e.touches[0].clientY); }, { passive: true });
+  scene.addEventListener('touchmove', function(e) {
+    if (dragState.active) e.preventDefault();
+    move(e.touches[0].clientY);
+  }, { passive: false });
+  scene.addEventListener('touchend', end);
+}
+
+var _wheelT = null;
+document.getElementById('stack-view').addEventListener('wheel', function(e) {
+  e.preventDefault();
+  clearTimeout(_wheelT);
+  _wheelT = setTimeout(function() { if (e.deltaY > 0) navNext(); else navPrev(); }, 55);
+}, { passive: false });
+
+/* ─── LIST ─── */
+function renderList() {
+  var container = document.getElementById('list-cards');
+  document.getElementById('list-count').textContent = ideas.length + '개';
+  if (!ideas.length) {
+    container.innerHTML = '<div style="text-align:center;padding:50px 0;color:var(--text-dim);font-size:13px;font-weight:600;">아직 기록된 아이디어가 없습니다</div>';
+    return;
+  }
+  container.innerHTML = ideas.map(function(idea) {
+    var t = TAG_MAP[idea.tag] || TAG_MAP.other;
+    var scoreVal = idea.score != null ? idea.score : '—';
+    var scoreDim = idea.score == null ? ' score-dim' : '';
+    return '<div class="list-card" data-id="' + esc(idea.id) + '" data-tag="' + esc(idea.tag) + '">' +
+      '<div class="lc-left">' +
+        '<div class="lc-tag">' + t.label + '</div>' +
+        '<div class="lc-title">' + esc(idea.title) + '</div>' +
+        (idea.body ? '<div class="lc-preview">' + esc(idea.body) + '</div>' : '') +
+        (idea.date ? '<div class="lc-date">' + esc(idea.date) + '</div>' : '') +
+      '</div>' +
+      '<div class="lc-score-big' + scoreDim + '">' + scoreVal + '</div>' +
+    '</div>';
+  }).join('');
+
+  container.querySelectorAll('.list-card').forEach(function(el) {
+    el.addEventListener('click', function() { openDetailById(el.dataset.id); });
+  });
+}
+
+/* ─── VIEW SWITCH ─── */
+function switchView(v) {
+  document.getElementById('stack-view').classList.toggle('active', v === 'stack');
+  document.getElementById('list-view').classList.toggle('active',  v === 'list');
+  document.getElementById('tab-stack').classList.toggle('active',  v === 'stack');
+  document.getElementById('tab-list').classList.toggle('active',   v === 'list');
+
+  if (v === 'list') {
+    var cards = document.querySelectorAll('#list-cards .list-card');
+    cards.forEach(function(card, i) {
+      card.classList.remove('animating');
+      card.style.animationDelay = '';
+      void card.offsetWidth; // reflow
+      card.style.animationDelay = (i * 55) + 'ms';
+      card.classList.add('animating');
+    });
+  }
+}
+
+/* ─── DETAIL ─── */
+function openDetailById(id) {
+  var idea = ideas.find(function(i) { return i.id === id; });
+  if (idea) openDetail(idea);
+}
+function openDetail(idea) {
+  var t = TAG_MAP[idea.tag] || TAG_MAP.other;
+  var tag = document.getElementById('d-tag');
+  tag.className = t.cls; tag.textContent = t.label;
+  document.getElementById('d-title').textContent = idea.title;
+  document.getElementById('d-body').textContent  = idea.body || '내용 없음';
+  document.getElementById('d-date').textContent  = idea.date || '';
+  var scoreEl = document.getElementById('d-score');
+  if (scoreEl) {
+    scoreEl.textContent = idea.score != null ? '점수 ' + idea.score + '/10' : '';
+    scoreEl.style.display = idea.score != null ? '' : 'none';
+  }
+  document.getElementById('d-del').onclick  = function() { deleteIdea(idea.id); };
+  document.getElementById('d-edit').onclick = function() { openCompose(idea.id); };
+
+  var view = document.getElementById('detail-view');
+  var card = document.getElementById('detail-card');
+  card.classList.remove('closing');
+  view.style.display = 'flex';
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() { view.classList.add('open'); });
+  });
+  document.getElementById('detail-backdrop').onclick = closeDetail;
+}
+function closeDetail() {
+  var view = document.getElementById('detail-view');
+  var card = document.getElementById('detail-card');
+  view.classList.remove('open'); card.classList.add('closing');
+  setTimeout(function() { view.style.display = 'none'; card.classList.remove('closing'); }, 440);
+}
+
+/* ─── KEYBOARD ─── */
+document.addEventListener('keydown', function(e) {
+  var dOpen = document.getElementById('detail-view').classList.contains('open');
+  var cOpen = document.getElementById('compose-view').classList.contains('open');
+  if (e.key === 'Escape') { closeDetail(); closeCompose(); return; }
+  if (dOpen || cOpen) return;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') navNext();
+  if (e.key === 'ArrowUp'   || e.key === 'ArrowLeft')  navPrev();
+});
+
+/* ─── TOAST ─── */
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2400);
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
